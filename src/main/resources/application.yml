@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: dev
+
+server:
+  port: 8080
+
+swagger:
+  enable: true
+
+mail:
+  user: madking
+  password: aaa123
+
+---
+spring:
+  profiles: test
+
+server:
+  port: 9527
+
+swagger:
+  enable: true
+
+mail:
+  user: madking
+  password: aaa123
