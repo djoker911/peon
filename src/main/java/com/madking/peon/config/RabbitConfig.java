@@ -1,4 +1,4 @@
-package com.madking.peon.config.rabbit;
+package com.madking.peon.config;
 
 
 import org.springframework.amqp.core.*;

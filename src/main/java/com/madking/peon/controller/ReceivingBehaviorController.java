@@ -1,20 +1,16 @@
 package com.madking.peon.controller;
 
-import com.madking.peon.config.ProducerConfig;
 import com.madking.peon.dto.APIResponseDTO;
-import com.madking.peon.dto.ReceivedUserDTO;
-import com.madking.peon.pojo.UserBehaviorPOJO;
-import com.madking.peon.util.TopicSender;
+import com.madking.peon.dto.EventLogDTO;
+import com.madking.peon.dto.RawLogDTO;
+import com.madking.peon.helper.rabbit.publisher.EventLogPublisher;
+import com.madking.peon.helper.rabbit.publisher.RawLogPublisher;
+import com.madking.peon.helper.rabbit.publisher.Sender;
 import io.swagger.annotations.Api;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
-import org.springframework.amqp.core.AmqpTemplate;
-
 
 
 @Controller
@@ -22,18 +18,58 @@ import org.springframework.amqp.core.AmqpTemplate;
 public class ReceivingBehaviorController {
 
     @Autowired
-    private TopicSender topicSender;
+    private Sender topicSender;
+
+    @Autowired
+    private RawLogPublisher rawLogPublisher;
+
+    @Autowired
+    private EventLogPublisher eventLogPublisher;
 
     @GetMapping("/wtfla")
     public @ResponseBody APIResponseDTO topicTest() {
         APIResponseDTO result = new APIResponseDTO();
-        topicSender.send3();
+        topicSender.send2();
         result.setSuccess(Boolean.TRUE);
         result.setMsg("Success");
         result.setStatus(HttpStatus.OK.value());
         return result;
     }
 
+    @GetMapping("/wtftwo")
+    public @ResponseBody APIResponseDTO doWtf(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam String path) {
+        APIResponseDTO result = new APIResponseDTO();
+        RawLogDTO rawLogDTO = new RawLogDTO(etuid, domain, groupId, path);
+        rawLogPublisher.publish(rawLogDTO);
+        result.setSuccess(Boolean.TRUE);
+        result.setMsg("Success");
+        result.setStatus(HttpStatus.OK.value());
+        return result;
+    }
+
+    @GetMapping("/wtf/display")
+    public @ResponseBody APIResponseDTO doWtfDisplay(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
+        APIResponseDTO result = new APIResponseDTO();
+        EventLogDTO eventLogDTO = new EventLogDTO(etuid, domain, groupId, widgetId, "display");
+        eventLogPublisher.publish(eventLogDTO);
+        result.setSuccess(Boolean.TRUE);
+        result.setMsg("Success");
+        result.setStatus(HttpStatus.OK.value());
+        return result;
+    }
+
+    @GetMapping("/wtf/click")
+    public @ResponseBody APIResponseDTO doWtfClick(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
+        APIResponseDTO result = new APIResponseDTO();
+        EventLogDTO eventLogDTO = new EventLogDTO(etuid, domain, groupId, widgetId, "click");
+        eventLogPublisher.publish(eventLogDTO);
+        result.setSuccess(Boolean.TRUE);
+        result.setMsg("Success");
+        result.setStatus(HttpStatus.OK.value());
+        return result;
+    }
+
+//    @RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam String path
 
 ////    private static final ProducerConfig producer = new ProducerConfig("testla","ha.q1", "q1");
 ////    private static final ProducerConfig producer2nd = new ProducerConfig("testla","q2", "q2.#.event");

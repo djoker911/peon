@@ -1,13 +1,20 @@
-package com.madking.peon.util;
+package com.madking.peon.helper.rabbit.publisher;
 
-import org.springframework.amqp.core.AmqpTemplate;
+import com.madking.peon.helper.rabbit.dispatch.TopicBuilder;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TopicSender {
+public class Sender {
+//    @Autowired
+//    private AmqpTemplate rabbitTemplate;
+
     @Autowired
-    private AmqpTemplate rabbitTemplate;
+    RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private TopicBuilder topicBuilder;
 
     public void send() {
         String context = "i am testTopic";
@@ -20,19 +27,21 @@ public class TopicSender {
         String context = "i am testTopic 1";
         System.out.println("Sender : " + context);
         String routingKey="topic.message";
-        //检查routingKey "topic.message" 是否匹配QueueName.message（topic.message），QueueName.messages（topic.#）中的routingKey
         this.rabbitTemplate.convertAndSend("topicExchange", routingKey,context);
     }
 
     public void send2() {
-        String context = "i am testTopic 2";
+        String context = "i am testTopic 2 , i will create non exist shit";
         System.out.println("Sender : " + context);
         String routingKey="topic.messages";
+        String exchange = "topicExchange";
+        topicBuilder.doBuild(this.rabbitTemplate,exchange,"testFromNothing",routingKey);
         this.rabbitTemplate.convertAndSend("topicExchange", routingKey,context);
+
     }
 
     public void send3() {
-        String context = "i am testTopic 3 again and again";
+        String context = "i am testTopic 3 again and again and fuck u la";
         System.out.println("Sender : " + context);
         String routingKey="q1";
         this.rabbitTemplate.convertAndSend("testla", routingKey,context);
