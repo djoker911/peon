@@ -6,6 +6,7 @@ import com.madking.peon.dto.RawLogDTO;
 import com.madking.peon.helper.rabbit.publisher.EventLogPublisher;
 import com.madking.peon.helper.rabbit.publisher.RawLogPublisher;
 import com.madking.peon.helper.rabbit.publisher.Sender;
+import com.madking.peon.service.ReceivingBehaviorService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,57 +18,103 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "ReceivingBehavior", description = "API ReceivingBehavior", tags = { "Receiving Behavior" })
 public class ReceivingBehaviorController {
 
-    @Autowired
-    private Sender topicSender;
+
+    private ReceivingBehaviorService receivingBehaviorService;
 
     @Autowired
-    private RawLogPublisher rawLogPublisher;
+    public ReceivingBehaviorController(ReceivingBehaviorService receivingBehaviorService){
+        this.receivingBehaviorService = receivingBehaviorService;
+    }
 
-    @Autowired
-    private EventLogPublisher eventLogPublisher;
 
-    @GetMapping("/wtfla")
-    public @ResponseBody APIResponseDTO topicTest() {
+    @GetMapping("/heartbeat")
+    public @ResponseBody APIResponseDTO processHeartbeat(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam String path) {
         APIResponseDTO result = new APIResponseDTO();
-        topicSender.send2();
-        result.setSuccess(Boolean.TRUE);
-        result.setMsg("Success");
-        result.setStatus(HttpStatus.OK.value());
+        Boolean publishResult = receivingBehaviorService.publishRawLog(etuid, domain, groupId, path);
+        if(publishResult.equals(Boolean.TRUE)){
+            result.setSuccess(Boolean.TRUE);
+            result.setMsg("Success");
+            result.setStatus(HttpStatus.OK.value());
+        }
         return result;
     }
 
-    @GetMapping("/wtftwo")
-    public @ResponseBody APIResponseDTO doWtf(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam String path) {
+    @GetMapping("/display")
+    public @ResponseBody APIResponseDTO processDisplay(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
         APIResponseDTO result = new APIResponseDTO();
-        RawLogDTO rawLogDTO = new RawLogDTO(etuid, domain, groupId, path);
-        rawLogPublisher.publish(rawLogDTO);
-        result.setSuccess(Boolean.TRUE);
-        result.setMsg("Success");
-        result.setStatus(HttpStatus.OK.value());
+        Boolean publishResult = receivingBehaviorService.publishDisplayEvent(etuid, domain, groupId, widgetId);
+        if(publishResult.equals(Boolean.TRUE)){
+            result.setSuccess(Boolean.TRUE);
+            result.setMsg("Success");
+            result.setStatus(HttpStatus.OK.value());
+        }
         return result;
     }
 
-    @GetMapping("/wtf/display")
-    public @ResponseBody APIResponseDTO doWtfDisplay(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
+    @GetMapping("/click")
+    public @ResponseBody APIResponseDTO processClick(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
         APIResponseDTO result = new APIResponseDTO();
-        EventLogDTO eventLogDTO = new EventLogDTO(etuid, domain, groupId, widgetId, "display");
-        eventLogPublisher.publish(eventLogDTO);
-        result.setSuccess(Boolean.TRUE);
-        result.setMsg("Success");
-        result.setStatus(HttpStatus.OK.value());
+        Boolean publishResult = receivingBehaviorService.publishClickEvent(etuid, domain, groupId, widgetId);
+        if(publishResult.equals(Boolean.TRUE)){
+            result.setSuccess(Boolean.TRUE);
+            result.setMsg("Success");
+            result.setStatus(HttpStatus.OK.value());
+        }
         return result;
     }
 
-    @GetMapping("/wtf/click")
-    public @ResponseBody APIResponseDTO doWtfClick(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
-        APIResponseDTO result = new APIResponseDTO();
-        EventLogDTO eventLogDTO = new EventLogDTO(etuid, domain, groupId, widgetId, "click");
-        eventLogPublisher.publish(eventLogDTO);
-        result.setSuccess(Boolean.TRUE);
-        result.setMsg("Success");
-        result.setStatus(HttpStatus.OK.value());
-        return result;
-    }
+
+//    @Autowired
+//    private Sender topicSender;
+//
+//    @Autowired
+//    private RawLogPublisher rawLogPublisher;
+//
+//    @Autowired
+//    private EventLogPublisher eventLogPublisher;
+//
+//    @GetMapping("/wtfla")
+//    public @ResponseBody APIResponseDTO topicTest() {
+//        APIResponseDTO result = new APIResponseDTO();
+//        topicSender.send2();
+//        result.setSuccess(Boolean.TRUE);
+//        result.setMsg("Success");
+//        result.setStatus(HttpStatus.OK.value());
+//        return result;
+//    }
+//
+//    @GetMapping("/wtftwo")
+//    public @ResponseBody APIResponseDTO doWtf(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam String path) {
+//        APIResponseDTO result = new APIResponseDTO();
+//        RawLogDTO rawLogDTO = new RawLogDTO(etuid, domain, groupId, path);
+//        rawLogPublisher.publish(rawLogDTO);
+//        result.setSuccess(Boolean.TRUE);
+//        result.setMsg("Success");
+//        result.setStatus(HttpStatus.OK.value());
+//        return result;
+//    }
+//
+//    @GetMapping("/wtf/display")
+//    public @ResponseBody APIResponseDTO doWtfDisplay(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
+//        APIResponseDTO result = new APIResponseDTO();
+//        EventLogDTO eventLogDTO = new EventLogDTO(etuid, domain, groupId, widgetId, "display");
+//        eventLogPublisher.publish(eventLogDTO);
+//        result.setSuccess(Boolean.TRUE);
+//        result.setMsg("Success");
+//        result.setStatus(HttpStatus.OK.value());
+//        return result;
+//    }
+//
+//    @GetMapping("/wtf/click")
+//    public @ResponseBody APIResponseDTO doWtfClick(@RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam Integer widgetId) {
+//        APIResponseDTO result = new APIResponseDTO();
+//        EventLogDTO eventLogDTO = new EventLogDTO(etuid, domain, groupId, widgetId, "click");
+//        eventLogPublisher.publish(eventLogDTO);
+//        result.setSuccess(Boolean.TRUE);
+//        result.setMsg("Success");
+//        result.setStatus(HttpStatus.OK.value());
+//        return result;
+//    }
 
 //    @RequestParam String etuid, @RequestParam String domain, @RequestParam String groupId, @RequestParam String path
 
